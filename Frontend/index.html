@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NetSage AI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* Top nav */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      height: 56px;
+      gap: 12px;
+    }
+
+    nav .brand {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    nav .brand span {
+      color: #2563eb;
+    }
+
+    nav .divider {
+      width: 1px;
+      height: 20px;
+      background: #e0e0e0;
+      margin: 0 4px;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    nav .nav-link {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    nav .nav-link:hover { background: #f0f0f0; color: #1a1a1a; }
+    nav .nav-link.active { background: #eff6ff; color: #2563eb; font-weight: 500; }
+
+    /* Main layout */
+    .container {
+      max-width: 860px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+
+    /* Page title */
+    .page-title {
+      margin-bottom: 28px;
+    }
+
+    .page-title h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .page-title p {
+      font-size: 14px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    /* Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* Field */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      padding: 10px 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #1a1a1a;
+      background: #fafafa;
+      resize: vertical;
+      min-height: 110px;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+      background: #fff;
+    }
+
+    textarea::placeholder { color: #aaa; }
+
+    /* Prompt textarea */
+    .prompt-textarea {
+      min-height: 90px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      align-items: center;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 7px;
+      border: none;
+      padding: 9px 20px;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:active { background: #1e40af; }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #fff;
+      color: #555;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover { background: #f5f5f5; color: #1a1a1a; }
+
+    /* Spinner */
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Result box */
+    .result-box { display: none; }
+    .result-box.visible { display: block; }
+
+    /* Status banner */
+    .status-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 18px;
+    }
+
+    .status-banner.ok {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+    }
+
+    .status-banner.fail {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #c2410c;
+    }
+
+    /* Issue list */
+    .issue-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    .issue-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 10px 14px;
+      border-radius: 7px;
+      background: #fff8f1;
+      border: 1px solid #ffe4cc;
+      color: #7c2d12;
+    }
+
+    .issue-item .icon { flex-shrink: 0; margin-top: 1px; }
+
+    /* Command tags */
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      margin-top: 18px;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .tag {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    /* AI response */
+    .ai-response {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #1a1a1a;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 60px;
+    }
+
+    /* Panel */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="brand">Net<span>Sage</span> AI</div>
+    <div class="divider"></div>
+    <div class="nav-links">
+      <button class="nav-link active" onclick="switchTab('checker', this)">Config Checker</button>
+      <button class="nav-link" onclick="switchTab('ai', this)">AI Assistant</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- Config Checker -->
+    <div class="panel active" id="tab-checker">
+      <div class="page-title">
+        <h2>Configuration Checker</h2>
+        <p>Paste your Cisco IOS CLI outputs below to detect common misconfigurations.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">CLI Outputs</div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="interface_brief">show ip interface brief</label>
+            <textarea id="interface_brief" placeholder="Paste output here..."></textarea>
+          </div>
+          <div class="field">
+            <label for="show_run">show run</label>
+            <textarea id="show_run" placeholder="Paste output here..."></textarea>
+          </div>
+          <div class="field">
+            <label for="show_vlan_brief">show vlan brief</label>
+            <textarea id="show_vlan_brief" placeholder="Paste output here..."></textarea>
+          </div>
+          <div class="field">
+            <label for="show_ip_route">show ip route</label>
+            <textarea id="show_ip_route" placeholder="Paste output here..."></textarea>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="btn-check" onclick="runCheck()">
+            <span class="spinner" id="spin-check"></span>
+            Run Diagnostics
+          </button>
+          <button class="btn-secondary" onclick="clearChecker()">Clear</button>
+        </div>
+      </div>
+
+      <div class="result-box" id="check-result">
+        <div class="card">
+          <div class="card-title">Results</div>
+
+          <div id="check-banner" class="status-banner"></div>
+
+          <ul class="issue-list" id="issues-list"></ul>
+
+          <div id="checks-section" style="display:none">
+            <div class="section-label">Suggested Commands</div>
+            <div class="tags" id="checks-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Assistant -->
+    <div class="panel" id="tab-ai">
+      <div class="page-title">
+        <h2>AI Assistant</h2>
+        <p>Ask anything about your Cisco network configuration or troubleshooting.</p>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label for="ai-prompt">Your question</label>
+          <textarea id="ai-prompt" class="prompt-textarea" placeholder="e.g. Why is my OSPF neighborship not forming between R1 and R2?"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" id="btn-ai" onclick="runAI()">
+            <span class="spinner" id="spin-ai"></span>
+            Ask AI
+          </button>
+          <button class="btn-secondary" onclick="clearAI()">Clear</button>
+        </div>
+      </div>
+
+      <div class="result-box" id="ai-result">
+        <div class="card">
+          <div class="card-title">Response</div>
+          <div class="ai-response" id="ai-response-text"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+
+    function switchTab(name, el) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      el.classList.add('active');
+    }
+
+    function setLoading(btnId, spinId, loading) {
+      document.getElementById(btnId).disabled = loading;
+      document.getElementById(spinId).style.display = loading ? 'block' : 'none';
+    }
+
+    async function runCheck() {
+      const payload = {
+        interface_brief: document.getElementById('interface_brief').value.trim(),
+        show_run:        document.getElementById('show_run').value.trim(),
+        show_vlan_brief: document.getElementById('show_vlan_brief').value.trim(),
+        show_ip_route:   document.getElementById('show_ip_route').value.trim(),
+      };
+
+      if (!Object.values(payload).some(v => v)) {
+        alert('Paste at least one CLI output to analyse.');
+        return;
+      }
+
+      setLoading('btn-check', 'spin-check', true);
+
+      try {
+        const res = await fetch(`${API}/ai/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        renderCheckResult(await res.json());
+      } catch {
+        alert('Could not reach the server. Make sure it is running on port 3000.');
+      } finally {
+        setLoading('btn-check', 'spin-check', false);
+      }
+    }
+
+    function renderCheckResult(data) {
+      const box       = document.getElementById('check-result');
+      const banner    = document.getElementById('check-banner');
+      const issuesList = document.getElementById('issues-list');
+      const checksSec  = document.getElementById('checks-section');
+      const checksList = document.getElementById('checks-list');
+
+      box.classList.add('visible');
+      issuesList.innerHTML = '';
+      checksList.innerHTML = '';
+
+      if (data.has_errors) {
+        banner.className = 'status-banner fail';
+        banner.textContent = `⚠ ${data.detected_issues.length} issue${data.detected_issues.length > 1 ? 's' : ''} found`;
+        data.detected_issues.forEach(issue => {
+          const li = document.createElement('li');
+          li.className = 'issue-item';
+          li.innerHTML = `<span class="icon">•</span><span>${issue}</span>`;
+          issuesList.appendChild(li);
+        });
+      } else {
+        banner.className = 'status-banner ok';
+        banner.textContent = '✓ No issues detected. Configuration looks clean.';
+      }
+
+      if (data.suggested_checks && data.suggested_checks.length) {
+        checksSec.style.display = 'block';
+        data.suggested_checks.forEach(cmd => {
+          const tag = document.createElement('span');
+          tag.className = 'tag';
+          tag.textContent = cmd;
+          checksList.appendChild(tag);
+        });
+      } else {
+        checksSec.style.display = 'none';
+      }
+    }
+
+    async function runAI() {
+      const prompt = document.getElementById('ai-prompt').value.trim();
+      if (!prompt) { alert('Enter a question first.'); return; }
+
+      setLoading('btn-ai', 'spin-ai', true);
+      const resultBox  = document.getElementById('ai-result');
+      const responseEl = document.getElementById('ai-response-text');
+      resultBox.classList.add('visible');
+      responseEl.textContent = 'Thinking...';
+
+      try {
+        const res = await fetch(`${API}/ai/get-review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt }),
+        });
+        const data = await res.json();
+        responseEl.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      } catch {
+        responseEl.textContent = 'Error: Could not reach the server.';
+      } finally {
+        setLoading('btn-ai', 'spin-ai', false);
+      }
+    }
+
+    function clearChecker() {
+      ['interface_brief','show_run','show_vlan_brief','show_ip_route'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('check-result').classList.remove('visible');
+    }
+
+    function clearAI() {
+      document.getElementById('ai-prompt').value = '';
+      document.getElementById('ai-result').classList.remove('visible');
+    }
+  </script>
+</body>
+</html>

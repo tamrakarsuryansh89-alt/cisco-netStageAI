@@ -1,0 +1,31 @@
+case_id,ai_root_cause_summary,confidence,verdict,human_note
+C01,No routing device present; VLANs isolated at Layer 2.,High,Accepted,
+C02,Trunk allowed-VLAN list restricts to VLAN 1 only.,High,Accepted,
+C03,VLAN 40 not in VLAN database; ports inactive.,High,Accepted,
+C04,Port mode misconfiguration; data VLAN inactive.,Medium,Edited,AI missed voice-VLAN multi-mode detail; corrected port mode explanation.
+C05,Native VLAN mismatch causing STP/CDP errors.,High,Accepted,
+C06,SW1 uplink to R1 not trunked; sub-interfaces receive no tagged frames.,High,Accepted,
+C07,Wrong default gateway on PC1.,High,Accepted,
+C08,ip routing not enabled on L3 switch.,High,Accepted,
+C09,Missing encapsulation dot1Q on sub-interface.,High,Accepted,
+C10,Vlan60 SVI admin-down; no shutdown required.,High,Accepted,
+C11,DHCP helper-address missing on SVI.,High,Accepted,
+C12,ACL blocking UDP 53; DNS queries dropped.,Medium,Edited,AI initially blamed NAT; human identified ACL deny rule for port 53.
+C13,DHCP pool exhausted; 253 bindings active.,High,Accepted,
+C14,VLAN20 pool has duplicate network statement.,Medium,Accepted,
+C15,Wrong DNS server IP in DHCP options.,High,Accepted,
+C16,Missing static route on R2 for 10.0.3.0/24.,High,Accepted,
+C17,MTU mismatch prevents OSPF DBD exchange.,High,Accepted,
+C18,OSPF hello/dead timer mismatch causing adjacency flap.,High,Accepted,
+C19,Primary static route missing; floating route active.,Medium,Edited,AI suggested wrong next-hop; human corrected to check primary route config.
+C20,R2 area 1 network statement missing; not acting as ABR.,High,Accepted,
+C21,Deny rule before permit in ACL; all subnet traffic blocked.,High,Accepted,
+C22,ACL denying TCP port 21 explicitly.,High,Accepted,
+C23,ACL not applied to any interface.,Medium,Edited,AI diagnosed wrong interface direction; human confirmed ACL not applied at all.
+C24,No ACL on guest sub-interface; unrestricted access.,High,Rejected,AI suggested VLAN issue; human identified missing ACL as root cause.
+C25,ACL missing established keyword; return traffic dropped.,Medium,Accepted,
+C26,ip nat inside not applied to LAN interface.,High,Accepted,
+C27,Inbound ACL blocking translated traffic on outside interface.,Medium,Edited,AI blamed NAT order; human confirmed ACL applied before NAT on outside.
+C28,NAT pool contains outdated public IP.,High,Accepted,
+C29,DHCP scope for WLAN VLAN 30 missing.,High,Accepted,
+C30,Client isolation disabled; no ACL on guest SVI.,High,Accepted,
